@@ -62,7 +62,7 @@ function calculate() {
     let extra = parseFloat(el.extraRate.value);
     if (isNaN(extra) || extra < 0) extra = 0;
     const sqft = area * 9;
-    const depthFeet = +(depth / 12).toFixed(3);
+    const depthFeet = depth / 12;
     const baseTons = (sqft * depthFeet * 145) / 2000;
     const tons = Math.ceil(baseTons * (1 + waste));
     const hours = Math.ceil(tons / tph);
