@@ -1,1 +1,444 @@
+<!DOCTYPE html>
 
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Athena Estimator</title>
+
+
+
+
+</head>
+
+
+
+<body>
+
+
+
+<h2>ATHENA ESTIMATOR</h2>
+
+
+
+<div class="container">
+
+
+
+    <div class="calculator">
+
+
+
+        <label>Area (SY)</label>
+
+        <input id="area" type="number" min="1">
+
+
+
+        <label>Depth (inches)</label>
+
+        <select id="depth">
+
+            <option>1</option>
+
+            <option>1.5</option>
+
+            <option selected>2</option>
+
+            <option>2.5</option>
+
+            <option>3</option>
+
+            <option>3.5</option>
+
+            <option>4</option>
+
+            <option>4.5</option>
+
+            <option>5</option>
+
+            <option>5.5</option>
+
+            <option>6</option>
+
+        </select>
+
+
+
+        <label>Paver Type</label>
+
+        <select id="paverType">
+
+            <option value="little">Little paver</option>
+
+            <option value="big">Big paver</option>
+
+        </select>
+
+
+
+        <label>Pave Tons Per Hour</label>
+
+        <input id="tphRate" type="number">
+
+
+
+        <label>Pave Price Per Hour</label>
+
+        <input id="manualRate" type="number">
+
+
+
+        <label>Add Extra Pave Hours</label>
+
+        <input id="extraRate" type="number" value="0">
+
+
+
+        <label>Price Per Ton</label>
+
+        <input id="price" type="number" value="100">
+
+
+
+        <label>Waste %</label>
+
+        <input id="waste" type="number" value="5">
+
+
+
+        <label>O&P %</label>
+
+        <input id="markup" type="number" value="18">
+
+
+
+        <button onclick="calculate()">Calculate</button>
+
+
+
+    </div>
+
+
+
+    <div class="resultsBox">
+
+        <div id="result"></div>
+
+    </div>
+
+
+
+</div>
+
+
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+
+
+const el = {
+
+    area: $("area"),
+
+    depth: $("depth"),
+
+    paverType: $("paverType"),
+
+    tphRate: $("tphRate"),
+
+    manualRate: $("manualRate"),
+
+    extraRate: $("extraRate"),
+
+    price: $("price"),
+
+    waste: $("waste"),
+
+    markup: $("markup"),
+
+    result: $("result")
+
+};
+
+
+
+function money(num) {
+
+    return num.toLocaleString(undefined, {
+
+        minimumFractionDigits: 2,
+
+        maximumFractionDigits: 2
+
+    });
+
+}
+
+
+
+function flashField(field) {
+
+    field.style.background = "#802020";
+
+    setTimeout(() => field.style.background = "#222", 700);
+
+}
+
+
+
+function validate(field, min, fallback) {
+
+    let val = parseFloat(field.value);
+
+
+
+    if (isNaN(val) || val < min) {
+
+        val = fallback;
+
+        field.value = fallback;
+
+        flashField(field);
+
+    }
+
+
+
+    return val;
+
+}
+
+
+
+function updatePaverRate() {
+
+    const presets = {
+
+        little: { tph: 75, rate: 850 },
+
+        big: { tph: 100, rate: 1450 }
+
+    };
+
+
+
+    const current = presets[el.paverType.value];
+
+    el.tphRate.value = current.tph;
+
+    el.manualRate.value = current.rate;
+
+}
+
+
+
+function calculate() {
+
+    const area = validate(el.area, 1, 1);
+
+    const depth = parseFloat(el.depth.value);
+
+
+
+    const price = validate(el.price, 1, 100);
+
+    const waste = validate(el.waste, 0, 5) / 100;
+
+    const markup = validate(el.markup, 0, 18) / 100;
+
+
+
+    let tph = parseFloat(el.tphRate.value);
+
+    let rate = parseFloat(el.manualRate.value);
+
+
+
+    const preset = {
+
+        little: { tph: 75, rate: 850 },
+
+        big: { tph: 100, rate: 1450 }
+
+    }[el.paverType.value];
+
+
+
+    if (!tph || tph <= 0) {
+
+        tph = preset.tph;
+
+        el.tphRate.value = tph;
+
+    }
+
+
+
+    if (!rate || rate <= 0) {
+
+        rate = preset.rate;
+
+        el.manualRate.value = rate;
+
+    }
+
+
+
+    let extra = parseFloat(el.extraRate.value);
+
+    if (isNaN(extra) || extra < 0) extra = 0;
+
+
+
+    const sqft = area * 9;
+
+    const depthFeet = +(depth / 12).toFixed(3);
+
+
+
+    const baseTons = (sqft * depthFeet * 145) / 2000;
+
+    const tons = Math.ceil(baseTons * (1 + waste));
+
+
+
+    const hours = Math.ceil(tons / tph);
+
+    const totalHours = hours + extra;
+
+
+
+    const productionCost = totalHours * rate;
+
+    const materialCost = tons * price;
+
+
+
+    const total = productionCost + materialCost;
+
+    const finalPrice = total * (1 + markup);
+
+    const profit = finalPrice - total;
+
+
+
+    el.result.innerHTML = `
+
+        Base Tons: ${baseTons.toFixed(2)}<br>
+
+        With Waste: ${tons}<br>
+
+        Paving Hours: ${totalHours}<br>
+
+        <span class="randomText">Speed: ${tph} TPH</span><br>
+
+        <span class="randomText">Paver Rate: $${money(rate)}/hr</span><br>
+
+        Paver Cost: $${money(productionCost)}<br>
+
+        Material: $${money(materialCost)}<br>
+
+        Cost: $${money(total)}<br>
+
+        <span class="profit">Profit: $${money(profit)}</span><br><br>
+
+        <span class="final">Final Price: $${money(finalPrice)}</span>
+
+    `;
+
+}
+
+
+
+/* Auto Recalculate */
+
+let timer;
+
+
+
+Object.values(el).forEach(field => {
+
+    if (!field) return;
+
+
+
+    if (field.tagName === "INPUT") {
+
+        field.addEventListener("input", () => {
+
+            clearTimeout(timer);
+
+            timer = setTimeout(calculate, 5000);
+
+        });
+
+    }
+
+
+
+    if (field.tagName === "SELECT") {
+
+        field.addEventListener("change", () => {
+
+            updatePaverRate();
+
+            calculate();
+
+        });
+
+    }
+
+});
+
+
+
+/* Enter Key Navigation */
+
+const fields = document.querySelectorAll("input, select");
+
+
+
+fields.forEach((field, index) => {
+
+    field.addEventListener("keydown", e => {
+
+        if (e.key === "Enter") {
+
+            e.preventDefault();
+
+
+
+            const next = fields[index + 1];
+
+
+
+            if (next) next.focus();
+
+            else calculate();
+
+        }
+
+    });
+
+});
+
+
+
+/* Startup */
+
+updatePaverRate();
+
+calculate();
+
+el.area.focus();
+
+</script>
+</body>
+</html>
