@@ -48,7 +48,7 @@ function calculate() {
         tackArea = area;
     el.tackArea.value = area;
     }
-    const rawTackCost = area * 0.88;
+    const rawTackCost = tackAarea * 0.88;
     const tackCost = Math.max(rawTackCost, 100);
     
     const depth = parseFloat(el.depth.value);
