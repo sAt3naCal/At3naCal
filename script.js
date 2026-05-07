@@ -43,12 +43,12 @@ function updatePaverRate() {
 function calculate() {
     const area = validate(el.area, 1, 1);
 
-    let tackArea = parseFloat(el.tackArea.value);
-    if (isNaN(tackArea) || tackArea <= 0) {
-        tackArea = area;
-        el.tackArea.value = area;
-    }
-    const rawTackCost = tackArea * 0.88;
+   // let tackArea = parseFloat(el.tackArea.value);
+  //  if (isNaN(tackArea) || tackArea <= 0) {
+      //  tackArea = area;
+      //  el.tackArea.value = area;
+  //  }
+    const rawTackCost = Area * 0.88;
     const tackCost = Math.max(rawTackCost, 100);
     
     const depth = parseFloat(el.depth.value);
