@@ -6,6 +6,7 @@ const el = {
     tphRate: $("tphRate"),
     manualRate: $("manualRate"),
     extraRate: $("extraRate"),
+    tackArea: $("tackArea"),
     price: $("price"),
     waste: $("waste"),
     markup: $("markup"),
@@ -41,10 +42,16 @@ function updatePaverRate() {
 }
 function calculate() {
     const area = validate(el.area, 1, 1);
+    let tackArea = parseFloat(el.tackArea.value);
+    if (isNaN(tackArea) || tackArea <= 0) {
+        tackArea = area;
+        el.tackArea.value = area;
+    }
+
     const depth = parseFloat(el.depth.value);
-    const price = validate(el.price, 1, 100);
-    const waste = validate(el.waste, 0, 5) / 100;
-    const markup = validate(el.markup, 0, 18) / 100;
+    const price = validate(el.price, 93.5, 100);
+    const waste = validate(el.waste, 2.5, 5) / 100;
+    const markup = validate(el.markup, 16, 18) / 100;
     let tph = parseFloat(el.tphRate.value);
     let rate = parseFloat(el.manualRate.value);
     const preset = {
@@ -67,11 +74,18 @@ function calculate() {
     const tons = Math.ceil(baseTons * (1 + waste));
     const hours = Math.ceil(tons / tph);
     const totalHours = hours + extra;
+    
+    const rawTackCost = tackArea * 0.88;
+    const tackCost = Math.max(rawTackCost, 100);
+
     const productionCost = totalHours * rate;
     const materialCost = tons * price;
-    const total = productionCost + materialCost;
+    const total = productionCost + materialCost + tackCost;
     const finalPrice = total * (1 + markup);
     const profit = finalPrice - total;
+
+
+
     el.result.innerHTML = `
         Base Tons: ${baseTons.toFixed(2)}<br>
         With Waste: ${tons}<br>
@@ -80,6 +94,7 @@ function calculate() {
         <span class="randomText">Paver Rate: $${money(rate)}/hr</span><br>
         Paver Cost: $${money(productionCost)}<br>
         Material: $${money(materialCost)}<br>
+        Tack Cost: $${money(tackCost)}<br>
         Cost: $${money(total)}<br>
         <span class="profit">Profit: $${money(profit)}</span><br><br>
         <span class="final">Final Price: $${money(finalPrice)}</span>
