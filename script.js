@@ -50,7 +50,7 @@ if (isNaN(tackArea) || tackArea < 0) {
     el.tackArea.value = 0;
 }
 
-const totalTackArea = area + tackArea;
+const totalTackArea = tackArea;
 
 const rawTackCost = totalTackArea * 0.88;
 
