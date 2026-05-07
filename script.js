@@ -55,6 +55,7 @@ function calculate() {
     const price = validate(el.price, 93.5, 100);
     const waste = validate(el.waste, 2.5, 5) / 100;
     const markup = validate(el.markup, 16, 18) / 100;
+    
     let tph = parseFloat(el.tphRate.value);
     let rate = parseFloat(el.manualRate.value);
     const preset = {
@@ -69,6 +70,7 @@ function calculate() {
         rate = preset.rate;
         el.manualRate.value = rate;
     }
+    
     let extra = parseFloat(el.extraRate.value);
     if (isNaN(extra) || extra < 0) extra = 0;
     const sqft = area * 9;
@@ -77,9 +79,6 @@ function calculate() {
     const tons = Math.ceil(baseTons * (1 + waste));
     const hours = Math.ceil(tons / tph);
     const totalHours = hours + extra;
-    
-
-
     const productionCost = totalHours * rate;
     const materialCost = tons * price;
     const total = productionCost + materialCost + tackCost;
